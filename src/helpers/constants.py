@@ -64,6 +64,9 @@ BUDGET_ALERT_NAME = os.environ.get("BUDGET_ALERT_NAME")
 if not BUDGET_ALERT_NAME:
     raise ValueError("BUDGET_ALERT_NAME must be set in environment variables.")
 
+# Protect all projects linked to the billing account
+PROTECT_ALL_PROJECTS = os.environ.get("PROTECT_ALL_PROJECTS", "0").lower() in TRUE_VALUES
+
 APP_CONFIG: dict[str, Any] = {
     "monthly_budget": MONTHLY_BUDGET_AMOUNT,
     # "weekly_budget": WEEKLY_BUDGET_AMOUNT,
@@ -74,4 +77,5 @@ APP_CONFIG: dict[str, Any] = {
     "debug_mode": DEBUG_MODE,
     "billing_account_id": BILLING_ACCOUNT_ID,
     "budget_alert_name": BUDGET_ALERT_NAME,
+    "protect_all_projects": PROTECT_ALL_PROJECTS,
 }

@@ -129,3 +129,41 @@ class CloudBillingWrapper:
             APP_LOGGER.critical(msg=f"Billing disabled for project {PROJECT_ID}.")
         except exceptions.PermissionDenied:
             APP_LOGGER.error(msg="Failed to disable billing, check permissions.")
+
+    def disable_billing_for_all_projects_in_account(self) -> None:
+        """Disable billing for every project linked to the configured billing account."""
+
+        billing_account_name = f"billingAccounts/{self.billing_account_id}"
+        APP_LOGGER.warning(
+            msg=f"Disabling billing for all projects under {billing_account_name}."
+        )
+
+        try:
+            projects = self.billing_client.list_project_billing_info(
+                name=billing_account_name
+            )
+        except exceptions.PermissionDenied:
+            APP_LOGGER.error(
+                msg="Failed to list projects for billing account, check permissions."
+            )
+            return
+
+        no_billing = billing_v1.ProjectBillingInfo(billing_account_name="")
+
+        for project_info in projects:
+            if not project_info.billing_enabled:
+                continue
+            project_name = f"projects/{project_info.project_id}"
+            try:
+                self.billing_client.update_project_billing_info(
+                    request=UpdateProjectBillingInfoRequest(
+                        name=project_name, project_billing_info=no_billing
+                    )
+                )
+                APP_LOGGER.critical(
+                    msg=f"Billing disabled for project {project_info.project_id}."
+                )
+            except exceptions.PermissionDenied:
+                APP_LOGGER.error(
+                    msg=f"Failed to disable billing for {project_info.project_id}, check permissions."
+                )

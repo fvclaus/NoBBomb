@@ -1,6 +1,6 @@
 """Kill Switch Service Module."""
 
-from helpers.constants import ACTION_ON_BUDGET_REACHED, APP_LOGGER
+from helpers.constants import ACTION_ON_BUDGET_REACHED, APP_LOGGER, PROTECT_ALL_PROJECTS
 from wrappers.cloud_billing import CloudBillingWrapper
 from wrappers.ressource_manager import RessourceManagerWrapper
 
@@ -22,6 +22,7 @@ class KillSwitchService:
     ) -> None:
         """Initialize Kill Switch Service."""
         self.action_on_budget_reached = ACTION_ON_BUDGET_REACHED
+        self.protect_all_projects = PROTECT_ALL_PROJECTS
         self.cloud_billing_wrapper = cloud_billing_wrapper
         self.ressource_manager_wrapper = ressource_manager_wrapper
         APP_LOGGER.info(
@@ -44,11 +45,15 @@ class KillSwitchService:
 
     def disable_billing_project(self) -> None:
         """
-        Disable billing for the GCP Project.
+        Disable billing for all projects linked to the billing account,
+        or only the current project, depending on PROTECT_ALL_PROJECTS.
 
         SEE: https://docs.cloud.google.com/billing/docs/how-to/modify-project#disable_billing_for_a_project
         """
-        self.cloud_billing_wrapper.disable_billing_for_the_project()
+        if self.protect_all_projects:
+            self.cloud_billing_wrapper.disable_billing_for_all_projects_in_account()
+        else:
+            self.cloud_billing_wrapper.disable_billing_for_the_project()
 
     def shutdown_project(self) -> None:
         """

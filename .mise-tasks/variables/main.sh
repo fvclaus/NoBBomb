@@ -5,7 +5,11 @@ export SCHEDULER_JOB_NAME="nobbomb-kill-switch-scheduler"
 export SERVICE_ACCOUNT_NAME="nobbomb-kill-switch-sa"
 export SERVICE_ACCOUNT_MAIL="$SERVICE_ACCOUNT_NAME@$GCP_PROJECT_ID.iam.gserviceaccount.com"
 export CLOUD_RUN_NAME="nobbomb-kill-switch"
-export BUDGET_ALERT_NAME="nobbomb-budget-alert-for-$GCP_PROJECT_ID"
+if [ "${PROTECT_ALL_PROJECTS:-0}" = "1" ]; then
+    export BUDGET_ALERT_NAME="nobbomb-budget-alert"
+else
+    export BUDGET_ALERT_NAME="nobbomb-budget-alert-for-$GCP_PROJECT_ID"
+fi
 export PUBSUB_BUDGET_ALERT_TOPIC="nobbomb-budget-alert-topic"
 export DEPLOY_REGION="us-central1"
 export EVENT_ARC="nobbomb-pubsub-to-cloudrun-event-arc"

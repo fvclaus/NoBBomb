@@ -54,6 +54,16 @@ gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" \
     --quiet \
     --condition None > /dev/null 2>&1
 
+# Add billing admin role at the billing account level so the service account
+# can list and unlink all projects under the account (not just its own project)
+if [ "${PROTECT_ALL_PROJECTS:-0}" = "1" ]; then
+    print_color "yellow" "Adding 'Billing Admin' role to the Service Account at billing account level.."
+    gcloud billing accounts add-iam-policy-binding "$BILLING_ACCOUNT_ID" \
+        --member "serviceAccount:$SERVICE_ACCOUNT_MAIL" \
+        --role "roles/billing.admin" \
+        --quiet > /dev/null 2>&1
+fi
+
 # Add Project Deleter role
 print_color "yellow" "Adding 'Project Deleter' role to the Service Account.."
 gcloud projects add-iam-policy-binding "$GCP_PROJECT_ID" \

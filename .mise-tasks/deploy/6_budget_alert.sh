@@ -9,6 +9,11 @@ print_color "blue" "Working on Budget Alerts.."
 
 PUBSUB_TOPIC_FULL_NAME="projects/$GCP_PROJECT_ID/topics/$PUBSUB_BUDGET_ALERT_TOPIC"
 
+FILTER_ARGS=()
+if [ "${PROTECT_ALL_PROJECTS:-0}" = "0" ]; then
+    FILTER_ARGS=("--filter-projects=projects/$GCP_PROJECT_ID")
+fi
+
 if gcloud billing budgets create \
     --project="$GCP_PROJECT_ID" \
     --billing-account="$BILLING_ACCOUNT_ID" \
@@ -18,7 +23,7 @@ if gcloud billing budgets create \
     --threshold-rule="percent=0.75,basis=current-spend" \
     --threshold-rule="percent=0.9,basis=current-spend" \
     --threshold-rule="percent=1.0,basis=current-spend" \
-    --filter-projects="projects/$GCP_PROJECT_ID" \
+    "${FILTER_ARGS[@]}" \
     --notifications-rule-pubsub-topic="$PUBSUB_TOPIC_FULL_NAME" \
     #--enable-project-level-recipients; # => Work in curl but not gcloud ?
 then
